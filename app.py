@@ -39,6 +39,7 @@ class loginForm(FlaskForm):
     password = PasswordField("password", validators = [Length(min=5)])
 
 class RegisterForm(FlaskForm):
+    name = StringField("name", validators = [Length(min=5)])
     email = StringField("email", validators = [Email()])
     password = PasswordField("password", validators = [Length(min=5)])
     repeat_password = PasswordField("repeat_password", validators = [Length(min=5)])
@@ -52,7 +53,7 @@ def login():
     form = loginForm()
 
     if form.validate_on_submit():
-        user = User.query.filter_by(email == form.email.data).first()
+        user = User.query.filter_by(email = form.email.data).first()
         if check_password_hash(user.password, form.password.data):
             login_user(user)
             return redirect(url_for('index'))
@@ -65,12 +66,14 @@ def register():
 
     if form.validate_on_submit() and form.password.data == form.repeat_password.data:
         user = User(
+            name = form.name.data,
             email = form.email.data,
             password = generate_password_hash(form.password.data)
         )
         db.session.add(user)
         db.session.commit()
-        flash("Bem vindo!!!")
+        login_user(user)
+        #flash("Bem vindo!!!")
         return redirect(url_for('index'))
         
     return render_template("register.html", form=form)
@@ -82,6 +85,6 @@ def logout():
 
 
 if __name__ == "__main__":
-    app.run()
-    else:
+    app.run(debug=True)
+else:
     app.run(debug=True)
