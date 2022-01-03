@@ -6,13 +6,15 @@ from flask_wtf import FlaskForm
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager, login_user
-from flask_login.utils import logout_user
+from flask_login.utils import login_required, logout_user
 from flask_login.mixins import UserMixin
 
 from wtforms import StringField, PasswordField
 from wtforms.validators import Length, Email
 
 from werkzeug.security import generate_password_hash, check_password_hash
+
+from dash_application import creat_dash_application
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "esta e mais uma senha!"
@@ -23,6 +25,8 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login = LoginManager()
 login.init_app(app)
+creat_dash_application(app)
+
 
 @login.user_loader
 def user_loader(user_id):
@@ -82,6 +86,11 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for("index"))
+
+#@app.route('/potato')
+#@login_required
+#def potato():
+#    return "Potato"
 
 
 if __name__ == "__main__":
