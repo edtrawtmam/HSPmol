@@ -16,7 +16,11 @@ from rdkit.Chem.Draw import rdMolDraw2D
 from rdkit.Chem import PandasTools
 
 
+
 dfu = dataQuali()
+
+#pd.set_option('precision', 2)
+#pd.options.display.float_format = '${:.2f}'.format
 
 # Criado o dataframe com os dados da quali, define-se variaveis de configuração de ambiente e aleatórias de exibição
 # Passa-se a manipular os dataframes e criar as views
@@ -36,7 +40,6 @@ metodos_o =['nelder-mead', 'COBYLA', 'SLSQP', 'BFGS']
 # 'Mathieu'
 # Variáveis de apoio
 m = metodos[0]
-df_semaforo = pd.DataFrame()
 aps=''
 apelido = ''
 repeticao=1 # Quantidade de vezes que recalcula para todas as 15 substâncias.
@@ -50,14 +53,14 @@ T_celsius = 20.0 # Temperatura em Célsius
 T = T_celsius + 273.15 # Temperatura em Kelvin
 
 # Inicialmente um sub-dataframe de relatório das moléculas alvo 
-dfr = dfu[(dfu['classe'].isin(['cof', 'IFA'])) & dfu['Metodo'].isin(metodos) & (dfu.dd.isna() == False)].copy()
-dfr['molecula']=dfr['Nome']
+#dfr = dfu[(dfu['classe'].isin(['cof', 'IFA'])) & dfu['Metodo'].isin(metodos) & (dfu.dd.isna() == False)].copy()
+#dfr['molecula']=dfr['Nome']
 # Insere as moléculas no dataframe do relatório
-Chem.PandasTools.AddMoleculeColumnToFrame(dfr, smilesCol='Smile', molCol='molecula', includeFingerprints=True)
-Chem.PandasTools.ChangeMoleculeRendering(dfr, renderer="SVG")
-Chem.PandasTools.RenderImagesInAllDataFrames(images=True)
+#Chem.PandasTools.AddMoleculeColumnToFrame(dfr, smilesCol='Smile', molCol='molecula', includeFingerprints=True)
+#Chem.PandasTools.ChangeMoleculeRendering(dfr, renderer="SVG")
+#Chem.PandasTools.RenderImagesInAllDataFrames(images=True)
 # Projeta em html o dataframe relatório
-tabela_relatorio = dfr.set_index(['molecula', 'Nome', 'Metodo'])[['dd', 'dp','dh', 'Ro','dt', 'Vm','Eval','Iter']].style.format(format_semaforo).to_html()
+#tabela_relatorio = dfr.set_index(['molecula', 'Nome', 'Metodo'])[['dd', 'dp','dh', 'Ro','dt', 'Vm','Eval','Iter']].style.format(format_semaforo).to_html()
 #print(tabela_relatorio)
 
 # Cria o aplicativo dash vinculado ao aplicativo flask
@@ -66,32 +69,18 @@ def creat_dash_application(flask_app):
 
     dash_app = dash.Dash(
         server = flask_app,
-        name = "Dashboard",
+        name = "Tabela",
         url_base_pathname = "/dash/",
         external_stylesheets=[dbc.themes.BOOTSTRAP]
     )
 
-    table_app = dash.Dash(
-        server = flask_app,
-        name = "Tabela",
-        url_base_pathname = "/table/",
-        external_stylesheets=[dbc.themes.BOOTSTRAP]
-    )
-
-    dash_app.layout = html.Div(children=[
-        html.H1(children='Olá! Analise!'),
-
-        html.Div(children='''
-            HSPmol com Dash.
-        '''),
-
-    ])
-
-
-    # Apresenta a tabela completa
+    # Apresenta a tabela completa e um gráfico bidimensional
     # Sorting operators (https://dash.plotly.com/datatable/filtering)
     # print(dfr.columns)
-    table_app.layout = html.Div([
+    dash_app.layout = html.Div([
+
+        dcc.Graph(id='my_graph'), 
+        
         html.Div([
             dcc.Input(
                 id='adding-rows-name',
@@ -99,7 +88,7 @@ def creat_dash_application(flask_app):
                 value='',
                 style={'padding': 10}
                 ),
-            html.Button('Add Column', id='adding-columns-button', n_clicks=0)
+            html.Button('Adicionar nova coluna', id='adding-columns-button', n_clicks=0)
             ], style={'height': 50}),
 
         dash_table.DataTable(
@@ -120,10 +109,23 @@ def creat_dash_application(flask_app):
             row_deletable=True,         # choose if user can delete a row (True) or not (False)
             selected_columns=[],        # ids of columns that user selects
             selected_rows=[],           # indices of rows that user selects
-            hidden_columns = [],
+            hidden_columns = ['CID', 'CAS', 'Obs', 'Smile', 'ITER', 'EVAL',
+                              'Ra_BFGS', 'RED_BFGS', 'X12_BFGS', 'out_ruimDentro_BFGS', 'out_bomFora_BFGS', 'Iter_BFGS', 'Eval_BFGS',
+                              'Ra_COBYLA', 'RED_COBYLA', 'X12_COBYLA', 'out_ruimDentro_COBYLA', 'out_bomFora_COBYLA', 'Iter_COBYLA', 'Eval_COBYLA',
+                              'Ra_SLSQP', 'RED_SLSQP', 'X12_SLSQP', 'out_ruimDentro_SLSQP', 'out_bomFora_SLSQP', 'Iter_SLSQP', 'Eval_SLSQP',
+                              'Ra_nelder-mead', 'RED_nelder-mead', 'X12_nelder-mead', 'out_ruimDentro_nelder-mead', 'out_bomFora_nelder-mead', 'Iter_nelder-mead', 'Eval_nelder-mead',
+                              'Ra_Mathieu', 'RED_Mathieu', 'X12_Mathieu', 'out_ruimDentro_Mathieu', 'out_bomFora_Mathieu', 
+                              'Ra_Abbott', 'RED_Abbott', 'X12_Abbott', 'out_ruimDentro_Abbott', 'out_bomFora_Abbott',
+                              'Semaforo_TEO', 'Eval', 'Iter', 
+                              'semaforo_NEV', 'semaforo_4BZC', 'semaforo_BZC', 'semaforo_TEO', 'semaforo_AS', 'semaforo_ADPC', 'semaforo_AAS'],
+
             page_action="native",       # all data is passed to the table up-front or not ('none')
             page_current=0,             # page number that user is on
-            page_size=15,                # number of rows visible per page
+            #page_size=15,                # number of rows visible per page
+            fixed_rows={'headers': True},
+            style_as_list_view=True,
+            style_table={'height': 500},  # defaults to 500
+
             style_cell={                # ensure adequate header width when text is shorter than cell's text
                 'minWidth': 95, 'maxWidth': 95, 'width': 95
             },
@@ -140,14 +142,12 @@ def creat_dash_application(flask_app):
         ),
 
     html.Button('Nova linha', id='editing-rows-button', n_clicks=0),
-    html.Button('Exportar para o Excel', id='save_to_csv', n_clicks=0),
+    html.Button('Exportar .csv', id='save_to_csv', n_clicks=0),
 
     # Create notification when saving to excel
     html.Div(id='placeholder', children=[]),
     dcc.Store(id="store", data=0),
     dcc.Interval(id='interval', interval=1000),
-
-    dcc.Graph(id='my_graph')
 
     ])
 
@@ -159,24 +159,24 @@ def creat_dash_application(flask_app):
         } for i in selected_columns]
 
 
-    @table_app.callback(
+    @dash_app.callback(
         Output('proj-table', 'columns'),
         [Input('adding-columns-button', 'n_clicks')],
         [State('adding-rows-name', 'value'),
         State('proj-table', 'columns')],
     )
     def add_columns(n_clicks, value, existing_columns):
-        print(existing_columns)
+        #print(existing_columns)
         if n_clicks > 0:
             existing_columns.append({
                 'name': value, 'id': value,
                 'renamable': True, 'deletable': True
             })
-        print(existing_columns)
+        #print(existing_columns)
         return existing_columns
 
 
-    @table_app.callback(
+    @dash_app.callback(
         Output('proj-table', 'data'),
         [Input('editing-rows-button', 'n_clicks')],
         [State('proj-table', 'data'),
@@ -190,18 +190,18 @@ def creat_dash_application(flask_app):
         return rows
 
 
-    @table_app.callback(
+    @dash_app.callback(
         Output('my_graph', 'figure'),
         [Input('proj-table', 'data')])
 
     def display_graph(data):
         df_fig = pd.DataFrame(data)
         # print(data)
-        print(df_fig)
-        fig = px.bar(df_fig, x='dv', y='dh')
+        #print(df_fig)
+        fig = px.scatter(df_fig, x='dv', y='dh', hover_data=df_fig)
         return fig
 
-    @table_app.callback(
+    @dash_app.callback(
         [Output('placeholder', 'children'),
         Output("store", "data")],
         [Input('save_to_csv', 'n_clicks'),
@@ -209,6 +209,7 @@ def creat_dash_application(flask_app):
         [State('proj-table', 'data'),
         State('store', 'data')]
     )
+    #def df_to_csv(n_clicks, n_intervals, dataset, s):
     def df_to_csv(n_clicks, n_intervals, dataset, s):
         output = html.Plaintext("Os dados serão salvos na sua pasta.",
                                 style={'color': 'green', 'font-weight': 'bold', 'font-size': 'large'})
@@ -236,5 +237,4 @@ def creat_dash_application(flask_app):
             dash_app.server.view_functions[view_function] = login_required(dash_app.server.view_functions[view_function])
 
     return dash_app
-
 

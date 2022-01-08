@@ -6,9 +6,12 @@ def dataQuali():
     dbQuali_source = 'https://github.com/edtrawtmam/HSPmol/raw/main/db/BaseDadosQuali.xlsx?raw=true'
     dfu = pd.read_excel(dbQuali_source)
     dfu.drop('Unnamed: 0', axis=1, inplace=True)
+    # Remapeia as colunas do tipo float para apenas dois algarismos após a vírgura
+    for c in dfu.columns:
+      if dfu[c].dtypes == float:
+        print('remapeando')
+        dfu[c]=dfu[c].map("{:,.2f}".format)
     return dfu
-
-
 
 
 
