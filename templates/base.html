@@ -20,6 +20,7 @@
                 <li><a href="{{ url_for('index') }}">Home</a></li>
                 {% if current_user.is_authenticated %}
                 <li><a href="/dash">Quase HSPmol</a></li>
+                <li><a href="{{ url_for('tables') }}">Tabela</a></li>
                 <li><a href="{{ url_for('logout') }}">Logout</a></li>
                 {% else%}
                 <li><a href="{{ url_for('login') }}">Login</a></li>

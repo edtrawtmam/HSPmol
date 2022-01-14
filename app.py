@@ -28,7 +28,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login = LoginManager()
 login.init_app(app)
-creat_dash_application(app)
+#creat_dash_application(app)
 
 
 @login.user_loader
@@ -90,24 +90,14 @@ def logout():
     logout_user()
     return redirect(url_for("index"))
 
-@app.route('/PCAblock')
-@login_required
-def PCAblock():
-    return models.app 
-
 @app.route("/tables")
-def show_tables():
-    data = pd.read_excel('dummy_data.xlsx')
+def tables():
+    data = pd.DataFrame([['Alex',10,'m'],['Bob',12,'m'],['Clarke',13,'f']],columns=['Name','Age','Gender'])
     data.set_index(['Name'], inplace=True)
     data.index.name=None
     females = data.loc[data.Gender=='f']
     males = data.loc[data.Gender=='m']
-    return render_template('view.html',tables=[females.to_html(classes='female'), males.to_html(classes='male')],
-    titles = ['na', 'Female surfers', 'Male surfers'])
-
-
+    return render_template('tables.html',tables=[females.to_html(classes='female'), males.to_html(classes='male')],titles = ['na', 'Female surfers', 'Male surfers'])
 
 if __name__ == "__main__":
-    app.run(debug=True)
-else:
     app.run(debug=True)
