@@ -36,7 +36,7 @@ css_directory = os.getcwd()+'/static/'
 stylesheets = ['bWLwgP.css']
 static_css_route = '/static/'
 
-
+external_stylesheets = [os.getcwd()+'/static/bWLwgP.css']
 
 dfu = dataQuali()
 
@@ -115,23 +115,23 @@ def creat_dash_application(flask_app):
         external_stylesheets=[dbc.themes.BOOTSTRAP]
     )
 
-    @dash_app.server.route('{}<stylesheet>'.format(static_css_route))
-    def serve_stylesheet(stylesheet):
-        if stylesheet not in stylesheets:
-            raise Exception()
-        return flask.send_from_directory(css_directory, stylesheet)
-    for stylesheet in stylesheets:
-        dash_app.css.append_css({"external_url": "/static/{}".format(stylesheet)})
+    #@dash_app.server.route('{}<stylesheet>'.format(static_css_route))
+    #def serve_stylesheet(stylesheet):
+    #    if stylesheet not in stylesheets:
+    #        raise Exception()
+    #    return flask.send_from_directory(css_directory, stylesheet)
+    #for stylesheet in stylesheets:
+    #    dash_app.css.append_css({"external_url": "/static/{}".format(stylesheet)})
 
 
     dash_app.layout = html.Div([
 
-        html.H1(children='Hello Chemoinfo'),
+        html.H1(children='HSPmol nascente'),
         dcc.Upload(
             id='upload-data',
             children=html.Div(
-                ['Drag and Drop SDF or ',
-                html.A('Select Files')
+                ['Arraste e solte o SDF ou ',
+                html.A('Selecione os Arquivos')
                 ]),
                 style={
                         'width': '80%',

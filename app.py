@@ -16,6 +16,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from dash_application import creat_dash_application
 
+import pandas as pd
+import models
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "esta e mais uma senha!"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sqlite.db'
@@ -87,10 +90,21 @@ def logout():
     logout_user()
     return redirect(url_for("index"))
 
-#@app.route('/potato')
-#@login_required
-#def potato():
-#    return "Potato"
+@app.route('/PCAblock')
+@login_required
+def PCAblock():
+    return models.app 
+
+@app.route("/tables")
+def show_tables():
+    data = pd.read_excel('dummy_data.xlsx')
+    data.set_index(['Name'], inplace=True)
+    data.index.name=None
+    females = data.loc[data.Gender=='f']
+    males = data.loc[data.Gender=='m']
+    return render_template('view.html',tables=[females.to_html(classes='female'), males.to_html(classes='male')],
+    titles = ['na', 'Female surfers', 'Male surfers'])
+
 
 
 if __name__ == "__main__":
